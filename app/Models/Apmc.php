@@ -12,5 +12,5 @@ class Apmc extends Model
     protected $table = 'apmc';
 
     // Define the fillable columns
-    protected $fillable = ['name', 'location', 'area'];
+    protected $fillable = ['name', 'location', 'area', 'file'];
 }

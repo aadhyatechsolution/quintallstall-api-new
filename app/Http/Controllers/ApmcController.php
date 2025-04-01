@@ -21,8 +21,13 @@ class ApmcController extends Controller
             'name' => 'required|string|max:255',
             'location' => 'required|string|max:255',
             'area' => 'required|string|max:255',
+            'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:10240'
         ]);
-
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $filePath = $file->store('uploads/apmc', 'public');
+            $request->merge(['file' => $filePath]);
+        }
         // Create and save the new record
         $apmc = Apmc::create($request->all());
 
