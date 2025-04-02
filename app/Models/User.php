@@ -2,44 +2,53 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Model;
 
-class User extends Authenticatable
+class User extends Model
 {
-    use HasApiTokens, HasFactory, Notifiable;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
+    use HasFactory, HasApiTokens;
+    
     protected $fillable = [
-        'name',
+        'first_name',
+        'last_name',
+        'business_name',
+        'phone_number',
         'email',
         'password',
+        'profile_image',
+        'shop_number',
+        'address_id',
+        'apmc_id',
+        'role_id',
+        'bank_account_id',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    // Define the relationships
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
+    // A user can belong to one address
+    public function address()
+    {
+        return $this->belongsTo(Address::class);
+    }
+
+    // A user can belong to one apmc
+    public function apmc()
+    {
+        return $this->belongsTo(Apmc::class);
+    }
+
+    // A user can have one role
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class, 'role_user', 'user_id', 'role_id');
+    }
+
+    // A user can have one bank account
+    public function bankAccount()
+    {
+        return $this->belongsTo(BankAccount::class);
+    }
+
 }

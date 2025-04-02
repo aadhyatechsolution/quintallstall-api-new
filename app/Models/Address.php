@@ -5,12 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Apmc extends Model
+class Address extends Model
 {
     use HasFactory;
-    protected $table = 'apmc';
-    protected $fillable = ['name', 'location', 'area', 'file'];
 
+    // Define the fillable attributes
+    protected $fillable = [
+        'street',
+        'city',
+        'state',
+        'zipcode',
+    ];
+
+    // Define the relationship
     public function users()
     {
         return $this->hasMany(User::class);

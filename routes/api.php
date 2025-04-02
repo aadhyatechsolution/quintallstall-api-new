@@ -1,9 +1,10 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApmcController;
-
+use App\Http\Controllers\AuthController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -14,7 +15,10 @@ use App\Http\Controllers\ApmcController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-
+Route::post('auth/register', [AuthController::class, 'register']);
+Route::post('auth/login', [AuthController::class, 'login']);
+Route::post('auth/generateOtp', [AuthController::class, 'generateOtp'])->middleware(\App\Http\Middleware\CorsMiddleware::class);
+Route::post('auth/verifyOtp', [AuthController::class, 'verifyOtp'])->middleware(\App\Http\Middleware\CorsMiddleware::class);
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
