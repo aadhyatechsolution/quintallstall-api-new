@@ -3,50 +3,80 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Role;
+use App\Models\Address;
+use App\Models\BankAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Crypt;
+
 
 class AuthController extends Controller
 {
-    // Register User
     public function register(Request $request)
-    {
-        
-        // Validate the incoming request
-        
-        $validated = $request->validate([
-            'first_name' => 'required|string',
-            'last_name' => 'required|string',
-            'business_name' => 'required|string',
-            'phone_number' => 'required|string|unique:users',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6|confirmed', // Ensure 'password_confirmation' is sent in request
-        ]);
-        
-        // Create user and hash the password
-        $user = User::create([
-            'first_name' => $validated['first_name'],
-            'last_name' => $validated['last_name'],
-            'business_name' => $validated['business_name'],
-            'phone_number' => $validated['phone_number'], 
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-        ]);
+    {   
+        try {
+            $validated = $request->validate([
+                'first_name' => 'required|string',
+                'last_name' => 'required|string',
+                'business_name' => 'required|string',
+                'street' => 'required|string', 
+                'phone_number' => 'required|string|unique:users',
+                'email' => 'required|email|unique:users',
+                'password' => 'required|min:6|confirmed',
+                'bank_account_number' => 'required|string', 
+                'city' => 'required|string', 
+                'state' => 'required|string', 
+                'postal_code' => 'required|string', 
+                'routing_number' => 'required|string', 
+                'shop_number' => 'required|string', 
+                'ifsc_code' => 'required|string',
+                'account_type' => 'required|string',
+                'branch_name' => 'required|string'
+            ]);
+            // Create an address record first
+            $address = Address::create([
+                'street' => $validated['street'],
+                'city' => $validated['city'],
+                'state' => $validated['state'],
+                'postal_code' => $validated['postal_code'],
+                'shop_number' => $validated['shop_number'],
+            ]);
+            $bankAccount = BankAccount::create([
+                'account_number' => Crypt::encryptString($validated['bank_account_number']),
+                'routing_number' => Crypt::encryptString($validated['routing_number']),
+                'ifsc_code' => $validated['ifsc_code'],
+                'account_type' => $validated['account_type'],
+                'branch_name' => $validated['branch_name']
+            ]);
+            $user = User::create([
+                'first_name' => $validated['first_name'],
+                'last_name' => $validated['last_name'],
+                'business_name' => $validated['business_name'],
+                'phone_number' => $validated['phone_number'], 
+                'email' => strtolower($validated['email']),
+                'password' => Hash::make($validated['password']),
+                'address_id' => $address->id, 
+                'bank_account_id' => $bankAccount->id,
+            ]);
 
-        // Assign the default role (assuming role with ID 1 exists)
-        $role = Role::find(1);  // Replace with dynamic role assignment if needed
-        $user->roles()->attach($role);
-        
-        // Return response with success message and user data
-        return response()->json([
-            'message' => 'User registered successfully',
-            'user' => $user
-        ]);
+            $role = Role::find(1);
+            $user->roles()->attach($role);
+
+            return response()->json([
+                'message' => 'User registered successfully',
+                'success' => true,
+                'user' => $user->makeHidden(['password', 'bank_account_number', 'routing_number']) 
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => $th->getMessage(),
+                'error' => true
+            ]);
+        }
     }
-
-    // Login User and return token
+    
     public function login(Request $request)
     {
         // Validate login request

@@ -14,7 +14,8 @@ class Address extends Model
         'street',
         'city',
         'state',
-        'zipcode',
+        'postal_code',
+        'shop_number',
     ];
 
     // Define the relationship
