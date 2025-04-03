@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class Apmc extends Model
 {
     use HasFactory;
-    protected $table = 'apmc';
     protected $fillable = ['name', 'location', 'area', 'file'];
 
     public function users()
