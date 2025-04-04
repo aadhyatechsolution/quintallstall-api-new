@@ -8,6 +8,8 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 
+use App\Http\Controllers\TestController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -34,3 +36,5 @@ Route::middleware(['auth:api'])->get('auth/profile', [AuthController::class, 'pr
 Route::resource('apmc', ApmcController::class);
 Route::resource('role', RoleController::class);
 Route::resource('products', ProductController::class);
+
+Route::get('test', [TestController::class,'test']);
