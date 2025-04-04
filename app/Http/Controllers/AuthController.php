@@ -136,24 +136,11 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         try {
-        
         $credentials = $request->validate([
-            'phone_number' => 'nullable|digits:10|required_without:email',
-            'email' => 'nullable|email|required_without:phone_number',
-            'password' => 'required_without:phone_number',
+            'email' => 'required|email',
+            'password' => 'required|min:6',
         ]);
-        $phoneNumber = $request->phone_number;
-        if($phoneNumber){
-            $existingPhoneNumberUser = \App\Models\User::where('phone_number', $phoneNumber)->first();
-            if($existingPhoneNumberUser){
-                $otp = rand(100000, 999999);
-                Cache::put('otp_' . $phoneNumber, $otp, now()->addMinutes(5));
-                return response()->json([
-                    'type' => 'otp',
-                    'otp' => $otp
-                ]);
-            }
-        }
+    
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
             $token = JWTAuth::fromUser($user, ['id' => $user->id]);
@@ -172,7 +159,43 @@ class AuthController extends Controller
             return $th->getMessage();
         }
     }
-
+    public function otpLogin(Request $request){
+        $validated = $request->validate([
+            'phone_number' => 'required|string|size:10',  
+            'otp' => 'required|string|size:6',  
+        ]);
+        $cachedOtp = Cache::get('otp_' . $validated['phone_number']);
+        if (!$cachedOtp) {
+            return response()->json(['error' => 'OTP is invalid or has expired.'], 400);
+        }
+        if ($cachedOtp != $validated['otp']) {
+            return response()->json(['error' => 'Invalid OTP.'], 400);
+        }
+        Cache::forget('otp_' . $validated['phone_number']);
+        $user = User::where('phone_number', $validated['phone_number'])->first();
+        if (!$user) {
+            return response()->json(['error' => 'User not found.'], 404);
+        }
+        $token = JWTAuth::fromUser($user, ['id' => $user->id]);
+        return response()->json([
+            'message' => 'OTP verified successfully. Login successful.',
+            'accessToken' => $token,  
+            'user' => $user->makeHidden(['password', 'bank_account_number', 'routing_number']), 
+        ]);
+        
+    }
+    public function generateLoginOtp(Request $request){
+        $request->validate([
+            'phone_number' => 'required|digits:10', 
+        ]);
+        $phoneNumber = $request->phone_number;
+        $otp = rand(100000, 999999);
+        Cache::put('otp_' . $phoneNumber, $otp, now()->addMinutes(5));
+        return response()->json([
+            'success' => true,
+            'otp' => $otp,
+        ], 200);
+    }
     public function generateOtp(Request $request)
     {
         $request->validate([
@@ -249,7 +272,7 @@ class AuthController extends Controller
         return response()->json([
             'error' => false,
             'message' => 'OTP verified successfully.',
-            'status' => 'success'
+            'success' => true
         ,]);
     }
     public function profile(Request $request)

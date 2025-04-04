@@ -23,6 +23,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('auth/register', [AuthController::class, 'register']);
 Route::post('auth/login', [AuthController::class, 'login']);
+Route::post('auth/otpLogin', [AuthController::class, 'otpLogin']);
+Route::post('auth/generateLoginOtp', [AuthController::class, 'generateLoginOtp']);
+
 Route::post('auth/generateOtp', [AuthController::class, 'generateOtp'])->middleware(\App\Http\Middleware\CorsMiddleware::class);
 Route::post('auth/verifyOtp', [AuthController::class, 'verifyOtp'])->middleware(\App\Http\Middleware\CorsMiddleware::class);
 Route::middleware(['auth:api'])->get('auth/profile', [AuthController::class, 'profile']);
