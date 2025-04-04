@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApmcController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProductController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,3 +33,4 @@ Route::middleware(['auth:api'])->get('auth/profile', [AuthController::class, 'pr
 
 Route::resource('apmc', ApmcController::class);
 Route::resource('role', RoleController::class);
+Route::resource('products', ProductController::class);
